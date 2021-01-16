@@ -1,3 +1,12 @@
+---
+title: "Solutions for Lab 3 exercises"
+author: "Marwin do Carmo"
+output: html_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message=FALSE)
+```
 ### Problems
 
 1. Create five samples of 25 observations from a normal distribution with mean 200, and standard deviation 100. Compute the mean of each sample, and plot the means in a graph using ggplot2. (1 point)
@@ -5,7 +14,7 @@
 
 2. Additionally calculate the standard deviation of each sample from above. Use the standard deviations for error bars, and produce another graph with the means along with error bars using ggplot2. (1 point)
 
-```{r solutions 1 and 2}
+```{r solutions 1 and 2, error = FALSE, }
 
 library(tidyverse)
 
@@ -88,3 +97,62 @@ sim_data
 - Rather than computing the mean for each sample, compute both forms of the standard deviation formula, including the sample standard deviation that divides by N-1, and the regular standard deviation that divides by N
 - You should have 10,000 samples for each sample size, and 10,000 standard deviations for each the sample and regular standard deviation. Your task is to find the average of each, for each sample-size.
 - Which of the standard deviations is more systematically biased? That is, which one is systematically worse at estimating the population standard deviation?
+
+```{r solution for exercise 4}
+
+# defining population parameters
+pop_mean <- 10
+pop_sd <- 5
+
+# sample sizes
+n_sample <- c(2, 5, 10, 50, 100)
+
+# creating a function for regular std deviation, which does divide by N,
+# instead of N - 1
+
+reg_sd <- function(x) {
+  m = mean(x)
+  var = (1/(length(x))) * sum((x - m)^2)
+  stdev = sqrt(var)
+  stdev
+}
+
+# Sample estimates
+
+# number of simulated draws
+n_sims <- 10000
+
+regular_sd <- c() # storing the regular sd values
+sample_sd <- c()  # storing the sample sd values
+sim_sample <- c() # storing the simulated samples
+
+avg_reg_sd <- c() # average regular sd
+avg_smpl_sd <- c() # average sample sd
+
+
+# running the simulations
+
+for (j in seq(n_sample)) {
+  for(i in seq(n_sims)) {
+    sim_sample <- rnorm(n_sample[j], mean = pop_mean, sd = pop_sd)
+    regular_sd[i] <- reg_sd(sim_sample)
+    sample_sd[i] <- sd(sim_sample)
+  }
+  avg_reg_sd[j] <- mean(regular_sd)
+  avg_smpl_sd[j] <- mean(sample_sd)
+}
+
+sim_data <- data.frame(n_sample,
+                       avg_reg_sd,
+                       diff_regsd = pop_sd - avg_reg_sd,
+                       avg_smpl_sd,
+                       diff_smpsd = pop_sd - avg_smpl_sd
+                       )
+sim_data
+
+```
+Since the difference between population sd and the average sample sd is smaller
+than the difference between population sd and the average regular sd across
+all sample sizes, we can conclude that sample standard deviation yields a 
+better estimate for the true standard deviation.
+
