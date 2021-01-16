@@ -1,0 +1,90 @@
+### Problems
+
+1. Create five samples of 25 observations from a normal distribution with mean 200, and standard deviation 100. Compute the mean of each sample, and plot the means in a graph using ggplot2. (1 point)
+
+
+2. Additionally calculate the standard deviation of each sample from above. Use the standard deviations for error bars, and produce another graph with the means along with error bars using ggplot2. (1 point)
+
+```{r solutions 1 and 2}
+
+library(tidyverse)
+
+n_sample <- 5
+n_obs <- 25
+sample_draw <- rnorm(n_sample * n_obs, mean = 200, sd = 100)
+
+df1 <- data.frame(sample_draw,
+                  sample_id = rep(seq(n_sample), each = n_obs)) %>% 
+  group_by(sample_id) %>% 
+  summarise(sample_mean = mean(sample_draw),
+            sample_sd = sd(sample_draw), .groups = "drop")
+
+df1
+
+df1 %>% 
+  ggplot(aes(x = sample_id, y = sample_mean)) +
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = sample_mean - sample_sd,
+                    ymax = sample_mean + sample_sd),
+                width = .25)
+```
+
+---
+
+The last two problems concern the concept of using a sample to estimate a property of the population or distribution the sample came from. For example, if we know the mean of a sample, can we be confident that the population has the same mean? If we were trying to guess at the population mean, what statistics from the sample should we use?
+
+Some sample statistics are "biased", and may systematically under or overestimate a population parameter. Others are "unbiased", in this case the sample statistic tends to correctly estimate the population parameter over the long run.
+
+3. Demonstrate that the sample mean across a range of n, is an unbiased estimator of the population mean using a monte-carlo simulation. (2 points).
+
+- The population is a normal distribution with mean = 10, standard deviation = 5.
+- Test a variety of n (sample size), including n = 2, 5, 10, 50, and 100
+- For each sample size n, your task is to draw 10,000 samples of that size, then for each sample, calculate the sample mean. If the mean is unbiased, then we expect that "on average" the sample means will be the same as the population mean. To determine if this is true, compute the mean of the sample means that you produce to see if it is close to the population mean. 
+- Show the mean of the sample means for each sample size.
+
+```{r solution for exercise 3}
+
+# defining population parameters
+pop_mean <- 10
+pop_sd <- 5
+
+# sample sizes
+n_sample <- c(2, 5, 10, 50, 100)
+
+# number of simulated draws
+n_sims <- 10000
+
+# sample estimates
+
+sample_mean <- c() # mean for each sample
+sample_sd <- c()   # sd for each sample
+sim_sample <- c()  # vector storing all the simulated means
+mean_average <- c() # mean average across for each simulation
+se <- c()           # standard error from the mean
+
+# running the simulations
+
+for (j in seq(n_sample)) {
+  for(i in seq(n_sims)) {
+    sim_sample <- rnorm(n_sample[j], mean = pop_mean, sd = pop_sd)
+    sample_mean[i] <- mean(sim_sample)
+    sample_sd[i] <- sd(sim_sample)
+  }
+  mean_average[j] <- mean(sample_mean)
+  se[j] <- sd(sample_mean)
+}
+
+# storing mean average for each sample size on a dataframe
+sim_data <- data.frame(n_sample,
+                       mean_average,
+                       se)
+sim_data
+
+```
+
+4. Use a monte carlo simulation to compare the standard deviation formulas (divide by N vs N-1), and show that the N-1 formula is a better unbiased estimate of the population standard deviation, especially for small n. (2 points)
+
+- Use the same normal distribution and samples sizes from above
+- Rather than computing the mean for each sample, compute both forms of the standard deviation formula, including the sample standard deviation that divides by N-1, and the regular standard deviation that divides by N
+- You should have 10,000 samples for each sample size, and 10,000 standard deviations for each the sample and regular standard deviation. Your task is to find the average of each, for each sample-size.
+- Which of the standard deviations is more systematically biased? That is, which one is systematically worse at estimating the population standard deviation?
