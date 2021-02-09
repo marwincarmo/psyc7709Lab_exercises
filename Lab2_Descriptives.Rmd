@@ -1,0 +1,177 @@
+---
+title: "Solutions for Lab 3 exercises"
+author: "Marwin do Carmo"
+output: html_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message=FALSE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+1. Use R to demonstrate that the mean minimizes the sum of the squared deviations from the mean. Accomplish the following steps:
+
+a. Produce a sample of at least 10 or more different numbers
+
+```{r}
+scores <- round(runif(10, 2, 50), 0)
+```
+
+
+b. Produce a simulation following the example from the concepts section
+
+```{r}
+n_to_test <- min(scores):max(scores)
+
+sum_deviations <- c()
+for (i in 1:length(n_to_test)) {
+  sum_deviations[i] = sum(scores - n_to_test[i])
+  
+}
+
+sum_deviations
+plot(sum_deviations)
+```
+
+c. Use your simulation to test a range of numbers smaller and larger than the mean to show that the mean minimizes the sum of the squared deviations from the mean.
+
+```{r}
+n_to_test <- min(scores):max(scores)
+
+sum_sq_deviations <- c()
+for (i in 1:length(n_to_test)) {
+  sum_sq_deviations[i] = sum((scores - n_to_test[i])^2)
+  
+}
+
+sum_sq_deviations
+```
+
+d. Plot your results.
+```{r}
+plot(sum_sq_deviations)
+```
+
+
+2. Write a custom R function for any one of the following descriptive statistics: median, mode, standard deviation, variance. Demonstrate that it produces the same value as the base R function given some set of numbers.
+
+```{r}
+# mean
+media <- function(x) sum(x)/length(x)
+media(scores) == mean(scores)
+
+# median
+mediana <- function(x) {
+  med_pos <- (length(x) + 1)/2
+  x <- sort(x)
+  res <- (x[floor(med_pos)] + x[ceiling(med_pos)])/2
+  res
+}
+mediana(scores)
+median(scores)
+
+# mode
+teste <- c(1,1,1,3,4,5)
+moda <- function(x) {
+  uniqv <- unique(x)
+   uniqv[which.max(tabulate(match(x, uniqv)))]
+}
+moda(teste)
+
+# standard deviation
+
+desv_pad <- function(x) {
+  sqrt(sum((x-mean(x))^2) / (length(x) - 1))
+}
+desv_pad(scores)
+sd(scores)
+
+# variance
+variancia <- function (x) {
+  sum((x-mean(x))^2) / (length(x) - 1)
+}
+variancia(scores)
+var(scores)
+```
+
+Imagine the same instructor taught a morning, afternoon, and evening section of the same course. And, the average scores for each section on a midterm were 85% for the morning, 90% for the afternoon, and 93% for the evening sections. Create a data.frame representing these means for each section. Then, use ggplot2 to plot the means as bar graph. (hint you will need one vector for the class sections, and one vector for the means. Then you can combine them into a data.frame before plotting them)
+
+
+```{r}
+avg_scores <- tibble(
+  period = c("morning", "afternoon", "evening"),
+  scores = c(.85, .90, .93)
+)
+avg_scores
+
+avg_scores %>% 
+  mutate(period = fct_relevel(period, "morning", "afternoon", "evening")) %>% 
+  ggplot() +
+  geom_bar(aes(x = period, y = scores, fill = period),
+           stat = 'identity')
+# ggplot(data = avg_scores, aes(x = period, y = scores, fill = period)) +
+#   geom_bar(stat = "identity")
+```
+
+
+Imagine there were two instructors, and they each taught different sections in the morning, afternoon and evening. The midterm averages for instructor 1 were 75%, 78%, and 80% in the morning, afternoon, and evening. The midterm averages for instructor 2 were 88%, 76%, and 63% for the morning, afternoon, and evening. Create a data.frame representing the means, the time of day, and the instructors (three columns). Then plot data.frame using ggplot2 as a bar graph.
+
+```{r}
+avg_scores2 <- tibble(
+  instructor = c(rep("1",3), rep("2", 3)),
+  period = rep(c("morning", "afternoon", "evening"), 2),
+  scores = c(.75, .78, .80, .88, .76, .63)
+) %>% 
+  mutate(period = fct_relevel(period, "morning", "afternoon", "evening"),
+         instructor = fct_relevel(instructor, "1", '2'))
+avg_scores2
+
+avg_scores2 %>% 
+  mutate(period = fct_relevel(period, "morning", "afternoon", "evening")) %>% 
+  ggplot() +
+  geom_bar(aes(x = period, y = scores, fill = instructor),
+           stat = 'identity', position = "dodge2")
+```
+
+
+Import the WHR2018.csv data file, containing measure from the World Happiness report from 2018. For the years 2010 to 2015, what was the mean “healthy life expectancy at birth” for each year (find the mean for each year across countries). Show your results in a table and in a graph using ggplot.
+
+```{r}
+whr18 <- read_csv("https://raw.githubusercontent.com/CrumpLab/psyc7709Lab/master/lab_solutions/Stats_I/open_data/WHR2018.csv")
+
+hle_mean <- whr18 %>% 
+  janitor::clean_names() %>% 
+  group_by(year) %>% 
+  filter(year %in% 2010:2015) %>% 
+  summarise(healthy_life_expectancy_at_birth = mean(healthy_life_expectancy_at_birth, na.rm = TRUE))
+
+knitr::kable(hle_mean)
+
+
+ggplot(data=hle_mean) +
+  geom_line(aes(x = year, y = healthy_life_expectancy_at_birth))
+```
+
+
+Repeat the above, except in addition to calculating the mean for each year, also calculate the standard deviation for “healthy life expectancy at birth” for each year. Then, add error bars to your graph using the +1 and -1 standard deviations from the means for each year.
+
+```{r}
+hle2 <- whr18 %>% 
+  janitor::clean_names() %>% 
+  group_by(year) %>% 
+  filter(year %in% 2010:2015) %>% 
+  summarise(mean_hle_birth = mean(healthy_life_expectancy_at_birth, na.rm = TRUE),
+            sd_hle_birth = sd(healthy_life_expectancy_at_birth, na.rm = TRUE))
+knitr::kable(hle2)
+
+hle2 %>% 
+ggplot(aes(x = year, y = mean_hle_birth)) +
+  geom_line() +
+  geom_errorbar(aes(ymin = mean_hle_birth - sd_hle_birth,
+                ymax = mean_hle_birth + sd_hle_birth))
+```
+
