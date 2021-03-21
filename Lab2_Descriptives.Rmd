@@ -8,11 +8,14 @@ output: html_document
 knitr::opts_chunk$set(warning = FALSE, message=FALSE)
 ```
 
+<<<<<<< HEAD
 ```{r}
 library(tidyverse)
 ```
 
 
+=======
+>>>>>>> 13ece437c1242bcc0da9bd04ad5ec656cbd5ff31
 1. Use R to demonstrate that the mean minimizes the sum of the squared deviations from the mean. Accomplish the following steps:
 
 a. Produce a sample of at least 10 or more different numbers
@@ -81,6 +84,7 @@ moda <- function(x) {
    uniqv[which.max(tabulate(match(x, uniqv)))]
 }
 moda(teste)
+<<<<<<< HEAD
 
 # standard deviation
 
@@ -96,10 +100,13 @@ variancia <- function (x) {
 }
 variancia(scores)
 var(scores)
+=======
+>>>>>>> 13ece437c1242bcc0da9bd04ad5ec656cbd5ff31
 ```
 
 Imagine the same instructor taught a morning, afternoon, and evening section of the same course. And, the average scores for each section on a midterm were 85% for the morning, 90% for the afternoon, and 93% for the evening sections. Create a data.frame representing these means for each section. Then, use ggplot2 to plot the means as bar graph. (hint you will need one vector for the class sections, and one vector for the means. Then you can combine them into a data.frame before plotting them)
 
+<<<<<<< HEAD
 
 ```{r}
 avg_scores <- tibble(
