@@ -1,0 +1,44 @@
+---
+title: "Solutions for Lab 4 exercises - Distributions II"
+author: "Marwin do Carmo"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message=FALSE)
+```
+
+```{r}
+library(knitr)
+```
+
+1. Estimate the letter occurrence probabilities of all 26 letters in English by measuring a paragraph of English text from wikipedia. (hint use strsplit() to split a paragraph into individual letters) (1 point).
+
+```{r}
+my_paragraph <- "In probability theory and statistics, covariance is a measure of the joint variability of two random variables.If the greater values of one variable mainly correspond with the greater values of the other variable, and the same holds for the lesser values (that is, the variables tend to show similar behavior), the covariance is positive. In the opposite case, when the greater values of one variable mainly correspond to the lesser values of the other, (that is, the variables tend to show opposite behavior), the covariance is negative. The sign of the covariance therefore shows the tendency in the linear relationship between the variables. The magnitude of the covariance is not easy to interpret because it is not normalized and hence depends on the magnitudes of the variables. The normalized version of the covariance, the correlation coefficient, however, shows by its magnitude the strength of the linear relation."
+the_letters <- tolower(unlist(strsplit(my_paragraph, split="")))
+
+```
+
+```{r}
+only_letters <- the_letters[the_letters %in% letters]
+letter_count <- as.data.frame(table(only_letters))
+```
+
+```{r}
+
+letters_df <- data.frame(
+  letras = letters
+)
+
+letter_freq <- merge(letters_df, letter_count, by.x = "letras", by.y = "only_letters", all.x = TRUE)
+
+letter_freq[is.na(letter_freq)] <- 0
+letter_freq["probabilites"] <- letter_freq["Freq"]/sum(letter_freq["Freq"])
+
+knitr::kable(letter_freq)
+
+```
+
