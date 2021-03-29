@@ -42,3 +42,18 @@ knitr::kable(letter_freq)
 
 ```
 
+2. Generate “random” strings of letters that are sampled from a distribution where letter occurrence probability is the same as natural English. Use the probabilities for each letter from this wikipedia article, or use your own estimates from the previous question (2 points).
+
+```{r}
+random_words <- c()
+for (i in 1:100) {
+  random_words[i] = paste0(
+    sample(letter_freq$letras, 5, replace = TRUE, 
+                      prob = letter_freq$probabilites), 
+    collapse = "")
+}
+```
+
+3. Generate a random walk of 10,000 steps. In a random walk, you are simulating the process of randomly taking a step up or down, as if you are on an infinite staircase. At each step you flip a coin. If you get heads you go up one step, if you get tails you go down one step. Start on step 0, then simulate a random walk for 10,000 steps. Your vector should preserve the step number for each step. For example, if the the first three steps were all heads, then the vector would begin with 0,1,2,3, which indicates a single step up each time. Plot the first 1,000 steps. (1 point)
+
+
